@@ -1,4 +1,4 @@
-'''
+"""
 --------------------------------------------------------------------------------
 G e n e r a l I n f o r m a t i o n
 --------------------------------------------------------------------------------
@@ -17,7 +17,8 @@ Auxiliary Files: None
 Special Instructions: None
 
 --------------------------------------------------------------------------------
-'''
+"""
+
 import sys
 import matplotlib.pylab as plt
 import numpy as np
@@ -84,6 +85,41 @@ def calc_mean_std_dev(wdates, wtemp):
         means[month-1] = np.mean(_months[month])
     return means, std_dev
 
+def calc_min_max(wdates, wtemp):
+    """
+    Taking in date strings and temperatures, combining the data into
+    dictionaries for each year, with a list of all temperatures for values
+    using standard min and max functions of lists to create the needed lists
+    :param wdates: 8 char list of date data in 'yyyymmdd' format
+    :param wtemp:  list of temperatures
+    :return: lists of the minimum and maximum temperatures per year and the years in question
+            -1 if passed in lists are not of equal length
+    """
+    if len(wdates) != len(wtemp):
+        print('Lists must be of equal length')
+        return -1
+
+    # create a dict of years with a temperature list for each to then calculate
+    _years = {}
+    for offset in range(len(wdates)):
+        _year = int(wdates[offset][:4])  # get just the year part of the data in dates list
+        if _year in _years:
+            _years[_year].append(float(wtemp[offset]))
+        else:
+            _years[_year] = []
+            _years[_year].append(float(wtemp[offset]))
+    num_years = len(_years)
+
+    t_min = [None] * num_years
+    t_max = [None] * num_years
+    l_years = [None] * num_years
+    offset = 0
+    for year in _years:  # We're making a terrible assumption that the years are in order
+        t_min[offset] = np.min(_years[year])
+        t_max[offset] = np.max(_years[year])
+        l_years[offset] = year
+        offset += 1
+    return t_min, t_max, l_years
 
 def plot_data_task1(dates, wtemp, month_mean, month_std):
     """
@@ -104,7 +140,7 @@ def plot_data_task1(dates, wtemp, month_mean, month_std):
     plt.title("Temperatures at Ogden")
     plt.plot(int_year, wtemp, "bo")
     plt.ylabel("Temperature, F")
-    plt.xlabel("Decimal Year")
+    plt.xlabel("Int Year")
 
     plt.subplot(2, 1, 2)  # select second subplot
     plt.ylabel("Temperature, F")
@@ -116,7 +152,7 @@ def plot_data_task1(dates, wtemp, month_mean, month_std):
     width = 0.8
     plt.bar(monthNumber,
             month_mean,
-            year=month_std,
+            yerr=month_std,
             width=width,
             color="lightgreen",
             ecolor="black",
@@ -125,14 +161,25 @@ def plot_data_task1(dates, wtemp, month_mean, month_std):
     plt.show()  # display plot
 
 
-def plot_data_task2(wdates, wtemperatures):
+def plot_data_task2(t_min, t_max, years):
     """
+    Plot the min an max temperatures per year we have valid records
+    :param t_min: list of minimum temps for the years
+    :param t_max: list of maximum temps for the years
+    :param years: Years in question
+    :return: -1 if passed in lists have unequal length
+    """
+    expected_length = len(years)
+    if (expected_length != len(t_max)) | (expected_length != len(t_min)):
+        return -1
+    plt.figure()
 
-    :param wdates:
-    :param wtemperatures:
-    :return:
-    """
-    pass
+    plt.plot(years, t_max, 'ro', label='Maximum Temperature')
+    plt.plot(years, t_min, 'bo', label='Minimum Temperature')
+    plt.legend()
+    plt.ylabel("Temperature, F")
+    plt.xlabel("Int Year")
+    plt.show()
 
 
 def main(infile):
@@ -144,7 +191,9 @@ def main(infile):
     #       1) years, 2) temperature, 3) month_mean, 4) month_std
     plot_data_task1(wdates, wtemperatures, month_mean, month_std)
     # TODO: Create the data you need for this
-    # plot_data_task2(xxx)
+    # calc_min_max conveniently returns exactly what plot_data_task2 requires
+    t_min, t_max, years = calc_min_max(wdates, wtemperatures)
+    plot_data_task2(t_min, t_max, years)
 
 
 if __name__ == "__main__":
