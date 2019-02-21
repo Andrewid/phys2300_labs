@@ -30,7 +30,7 @@ import numpy as np
 #       from all the remaining lines:
 #       read in the date (index 2) and temperature (index 3)
 #       parse the date string into year, month, day
-#       convert year, month, day into decimal years for plotting
+#       convert year, month, day into int years for plotting
 # 4) make two lists for the time series - the decimal year list and the temperature list
 # 5) sort the data by month so we can average it and take the standard deviation later
 # 6) Plot the results
@@ -51,8 +51,8 @@ def parse_data(infile):
         for line in f_in:
             _fields = line.split()
             if _fields[3] != '999.9':
-                wdates.append(_fields[2])                  # strings, for now
-                wtemperatures.append(float(_fields[3]))    # convert to float
+                wdates.append(_fields[2])                  # full date strings, for now?
+                wtemperatures.append(float(_fields[3]))    # temps converted to floats
     return wdates, wtemperatures
 
 
@@ -71,14 +71,13 @@ def calc_mean_std_dev(wdates, wtemp):
     std_dev = [None] * 12      # up to 11 for December
     # create a dict of months with a temperature list for each to then calculate
     _months = {}
-    for key, value in enumerate(wdates):
-        _month = int(value[4:6])
+    for offset in range(len(wdates)):
+        _month = int(wdates[offset][4:6])  # get just the month part of the data in dates list
         if _month in _months:
-            _months[month].append(float(wtemp[key]))
+            _months[_month].append(float(wtemp[offset]))
         else:
-            _months[month] = []
-            _months[month].append(float(wtemp[key]))
-    # _months.sort() # j/k Dictionaries can't be sorted
+            _months[_month] = []
+            _months[_month].append(float(wtemp[offset]))
 
     for month in _months:
         std_dev[month-1] = np.std(_months[month])
@@ -86,7 +85,7 @@ def calc_mean_std_dev(wdates, wtemp):
     return means, std_dev
 
 
-def plot_data_task1(wyear, wtemp, month_mean, month_std):
+def plot_data_task1(dates, wtemp, month_mean, month_std):
     """
     Create plot for Task 1.
     :param: wyear: list with year (in decimal)
@@ -96,10 +95,14 @@ def plot_data_task1(wyear, wtemp, month_mean, month_std):
     :param: month_std: list with month's mean standard dev values
     """
     # Create canvas with two subplots
+    int_year = []  # empty list to fill with parsed year data
+    for s_date in dates:
+        int_year.append(int(s_date[:4]))  # Just give me the first four chars, as an int
+
     plt.figure()
     plt.subplot(2, 1, 1)  # select first subplot
     plt.title("Temperatures at Ogden")
-    plt.plot(wyear, wtemp, "bo")
+    plt.plot(int_year, wtemp, "bo")
     plt.ylabel("Temperature, F")
     plt.xlabel("Decimal Year")
 
@@ -111,8 +114,13 @@ def plot_data_task1(wyear, wtemp, month_mean, month_std):
     plt.xlim([0.7, 13])
     plt.ylim([0, 90])
     width = 0.8
-    plt.bar(monthNumber, month_mean, year=month_std, width=width,
-            color="lightgreen", ecolor="black", linewidth=1.5)
+    plt.bar(monthNumber,
+            month_mean,
+            year=month_std,
+            width=width,
+            color="lightgreen",
+            ecolor="black",
+            linewidth=1.5)
     plt.xticks(monthNumber, months)
     plt.show()  # display plot
 
