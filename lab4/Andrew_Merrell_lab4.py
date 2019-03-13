@@ -37,12 +37,13 @@ def read_wx_data(wx_file, harbor_data):
         # smooth out data??
         if 0 > temp > -13 and temp - previous_temp > 3:
             temp = _df[index-1]['Ch1:Deg F'] + _df[index+1]['Ch1:Deg F'] / 2  # Average the adjacent temps
+
         _time = dt.strptime(time, '%H:%M:%S')
         _seconds = (_time - _time0).total_seconds()  # Delta
         _hours = _seconds/3600
         harbor_data['wx_times'].append(_hours)
         harbor_data['wx_temperatures'].append(temp)
-
+        previous_temp = temp
     return 0
 
 
@@ -61,20 +62,22 @@ def read_gps_data(gps_file, harbor_data):
     _df = pd.read_csv(gps_file, sep='\t', names=headers, skiprows=[1], header=0)
     # note, the second row is dashes
     _time0 = None
-    for index, row in _df.iterrows():
+    for _index, row in _df.iterrows():
         hour = row['hour']
         minute = row['minute']
         second = row['second']
         altitude = row['altitude']
+        _time = dateutil.parser.parse('{}:{}:{}'.format(hour, minute, second))
 
         if not _time0:
-            _time0 = dateutil.parser.parse('{}:{}:{}'.format(hour, minute, second))
+            _time0 = _time
 
-        slope= get_slope(x1, y1, x2, y2)
-        _time = dateutil.parser.parse('{}:{}:{}'.format(hour, minute, second))
-        harbor_data['gps_times'].append((_time - _time0).total_seconds()/3600)  # hours elapsed since _time0
+        # hours elapsed since _time0
+        hours_elapsed = (_time - _time0).total_seconds()/3600
+        harbor_data['gps_times'].append(hours_elapsed)
         harbor_data['gps_altitude'].append(altitude)
     return 0
+
 
 def get_slope_intercept(x1, y1, x2, y2):
     """
@@ -89,6 +92,7 @@ def get_slope_intercept(x1, y1, x2, y2):
     intercept = y1 - slope * x1
     return slope, intercept
 
+
 def interpolate_wx_from_gps(harbor_data):
     """
     Compute wx altitudes by interpolating from gps altitudes
@@ -100,26 +104,48 @@ def interpolate_wx_from_gps(harbor_data):
     :param harbor_data: A dictionary to collect data.
     :return: Nothing
     """
+    harbor_data["altitude_up"] = []
+    harbor_data["temperature_up"] = []
+    harbor_data["altitude_down"] = []
+    harbor_data["temperature_down"] = []
+
     wx_index = 0
     for i, gps_time_delta in enumerate(harbor_data['gps_times']):
-        wx_time_delta = harbor_data['wx_times'][wx_index]
-        gps_next_time_delta = harbor_data['gps_times'][i+1]
+        # do I need this?
+        if not i < len(harbor_data["gps_times"]):
+            break
+
         altitude = harbor_data["gps_altitude"][i]
-        next_altitude = harbor_data["gps_altitude"][i+1] | altitude
+        gps_next_time_delta = harbor_data['gps_times'][i+1]
+        next_altitude = harbor_data["gps_altitude"][i+1]
+
+        wx_time_delta = harbor_data['wx_times'][wx_index]
+
         while gps_next_time_delta > wx_time_delta:
             # interpolate
-            slope, intercept = get_slope_intercept(gps_time_delta,
-                                                   altitude,
-                                                   gps_next_time_delta,
-                                                   next_altitude)
+            slope, intercept = get_slope_intercept(gps_time_delta,       # x1
+                                                   altitude,             # y1
+                                                   gps_next_time_delta,  # x2
+                                                   next_altitude)        # y2
+            
             wx_temp = harbor_data["wx_temperatures"][wx_index]
             interp_altitude = slope * wx_time_delta + intercept
+
+            # Decide where to put the data based on if we're descending or not
+            if altitude < next_altitude:
+                # ascending
+                harbor_data["altitude_up"].append(interp_altitude)
+                harbor_data["temperature_up"].append(wx_temp)
+
+            else:
+                # descending
+                harbor_data["altitude_down"].append(interp_altitude)
+                harbor_data["temperature_down"].append(wx_temp)
+
+            # then increment weather index
             wx_index += 1
-            # now populate the interp_altitude and the wx_temp at the wx_index
-            # Decide where to put the data based on if we're descending
+
         # if I got here then I need to go to the next delta time in gps times
-
-
 
     pass
 
