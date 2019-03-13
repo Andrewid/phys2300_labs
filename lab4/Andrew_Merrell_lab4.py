@@ -70,11 +70,24 @@ def read_gps_data(gps_file, harbor_data):
         if not _time0:
             _time0 = dateutil.parser.parse('{}:{}:{}'.format(hour, minute, second))
 
+        slope= get_slope(x1, y1, x2, y2)
         _time = dateutil.parser.parse('{}:{}:{}'.format(hour, minute, second))
         harbor_data['gps_times'].append((_time - _time0).total_seconds()/3600)  # hours elapsed since _time0
         harbor_data['gps_altitude'].append(altitude)
     return 0
 
+def get_slope_intercept(x1, y1, x2, y2):
+    """
+    get the slope and y intercept of a line based on 2 pairs of coordinates
+    :param x1: initial x coord
+    :param y1: initial y coord
+    :param x2: second x coord
+    :param y2: second y coord
+    :return: the slope between the 2 points
+    """
+    slope = (y2-y1)/(x2-x1)
+    intercept = y1 - slope * x1
+    return slope, intercept
 
 def interpolate_wx_from_gps(harbor_data):
     """
@@ -87,6 +100,26 @@ def interpolate_wx_from_gps(harbor_data):
     :param harbor_data: A dictionary to collect data.
     :return: Nothing
     """
+    wx_index = 0
+    for i, gps_time_delta in enumerate(harbor_data['gps_times']):
+        wx_time_delta = harbor_data['wx_times'][wx_index]
+        gps_next_time_delta = harbor_data['gps_times'][i+1]
+        altitude = harbor_data["gps_altitude"][i]
+        next_altitude = harbor_data["gps_altitude"][i+1] | altitude
+        while gps_next_time_delta > wx_time_delta:
+            # interpolate
+            slope, intercept = get_slope_intercept(gps_time_delta,
+                                                   altitude,
+                                                   gps_next_time_delta,
+                                                   next_altitude)
+            wx_temp = harbor_data["wx_temperatures"][wx_index]
+            interp_altitude = slope * wx_time_delta + intercept
+            wx_index += 1
+            # now populate the interp_altitude and the wx_temp at the wx_index
+            # Decide where to put the data based on if we're descending
+        # if I got here then I need to go to the next delta time in gps times
+
+
 
     pass
 
