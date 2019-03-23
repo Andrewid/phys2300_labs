@@ -102,7 +102,7 @@ def main():
 
     # gravity is -9.8m/s
     ax =  0.0   # no sideways gravity
-    ay = -9.8   # define gravity 
+    ay = -9.8   # define gravity
 
     delt = 0.1  # change in time
     t    = 0.0  # initial time
@@ -110,16 +110,21 @@ def main():
     # Consider braking this to an input function
     # allow each to loop unit proper data is input
     # TODO: error handling if not input NAN
+#    x0  = input("Initial x coordinate: ")   or 1.0
+#    vx0 = input("Initial x velocity m/s: ") or 70.0
+
+#    y0  = input("Initial y coordinate: ")   or 0.0
+#    vy0 = input("Initial y velocity m/s: ") or 80.0
+
     x0  = input("Initial x coordinate: ")   or 1.0
     vx0 = input("Initial x velocity m/s: ") or 70.0
 
     y0  = input("Initial y coordinate: ")   or 0.0
     vy0 = input("Initial y velocity m/s: ") or 80.0
-
     # pass x & y arrays to function?
-    # have function just pass 2 arrays back? 
+    # have function just pass 2 arrays back?
     x_coordinates, y_coordinates = two_dimensional_motion(x0, y0, vx0, vy0, ax, ay, delt,t)
-    
+
     # plot & display
     plot_data(x_coordinates, y_coordinates, 'Position of x over time', 'height')
 

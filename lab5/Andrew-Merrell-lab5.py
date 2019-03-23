@@ -1,5 +1,6 @@
 from vpython import *
 from math import sin, cos
+import matplotlib.pyplot as plt
 import argparse
 
 
@@ -17,13 +18,13 @@ def set_scene(data):
     scene.forward = vector(0, -.3, -1)
     scene.x = -1
     # Set background: floor, table, etc
-
+    #ground = box(pos=(100, 0, 0), size=(200, 0, 0))
 
 def motion_no_drag(data):
     """
     Create animation for projectile motion with no dragging force
     """
-    ball_nd = sphere(pos=vector(-25, data['init_height'], 0),
+    ball_nd = sphere(pos=vector(0, data['init_height'], 0),
                      radius=1, color=color.cyan, make_trail=True)
     # Follow the movement of the ball
     scene.camera.follow(ball_nd)
@@ -34,9 +35,10 @@ def motion_no_drag(data):
     data["y1"] = []
     y0 = data["init_height"]
     x0 = 0
-    x, y = 0, 0
-    ball_nd.pos = (x, y, 0)
-    dt = .1
+    x, y = x0, y0
+    ball_nd.pos.x = x
+    ball_nd.pos.y = y
+    dt = data['deltat']
     t = 0
     vx0 = data['init_velocity'] * cos(radians(data['theta']))
     vy0 = data['init_velocity'] * sin(radians(data['theta']))
@@ -54,14 +56,51 @@ def motion_drag(data):
     """
     Create animation for projectile motion with dragging force
     """
-    ball_wd = sphere(pos=vector(-25, data['init_height'], 0),
-                     radius=1, color=color.red, make_trail=True)
+    ball_wd = sphere(pos=vector(0, data['init_height'], 0),
+                     radius=1, color=color.orange, make_trail=True)
     scene.camera.follow(ball_wd)
 
     data["x2"] = []
-    data["x2"] = []
+    data["y2"] = []
+    y0 = data["init_height"]
+    x0 = 0
+    x, y = x0, y0
+    ball_wd.pos.x = x
+    ball_wd.pos.y = y
+    dt = data['deltat']
+    t = 0
+    vx0 = data['init_velocity'] * cos(radians(data['theta']))
+    vy0 = data['init_velocity'] * sin(radians(data['theta']))
+    while y >= 0:
+        rate(1000)
+        data["x2"].append(x)
+        data["y2"].append(y)
+        ball_wd.pos = vector(x, y, 0)
+        t = t + dt
+        # TODO:
+        _Fd = (-.5 * data['rho'] *
+               data['init_velocity'] *
+               data['ball_area'])
+
+        x = (x0 + vx0 * t + _Fd)
+        y = (y0 + vy0 * t +
+             (data['gravity']/2) * (t**2) + _Fd)
+
     pass
 
+def plot_data(data):
+    """
+
+    :param data:
+    :return:
+    """
+
+    plt.figure()
+    plt.title('')  # TODO:
+    plt.plot(data['x1'], data['y1'], label="No air resistance")
+    plt.plot(data['x2'], data['y2'], label="With air resistance")
+    plt.show()
+    pass
 
 def main():
     """
@@ -72,7 +111,8 @@ def main():
     parser.add_argument("--height", "-y", default="1.2", type=float,
                         help="Position on the Y axis to start",
                         required=False)
-    parser.add_argument("--velocity", "-v", default='5', type=float,
+    # TODO: make the following 2 required
+    parser.add_argument("--velocity", "-v", default='20', type=float,
                         help="Velocity in m/s",
                         required=False)
     parser.add_argument("--angle", "-a", default='45', type=float,
@@ -101,9 +141,9 @@ def main():
     # 2) No Drag Animation
     motion_no_drag(data)
     # 3) Drag Animation
-#    motion_drag(data)
+    motion_drag(data)
     # 4) Plot Information: extra credit
-#    plot_data(data)
+    plot_data(data)
 
 
 if __name__ == "__main__":
