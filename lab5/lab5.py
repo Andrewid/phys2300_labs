@@ -45,11 +45,12 @@ def main():
     """
     # 1) Parse the arguments
 
+
     # Set Variables
     data = {}       # empty dictionary for all data and variables
-#    data['init_height'] = args.height   # y-axis
-#    data['init_velocity'] = args.velocity  # m/s
-#    data['theta'] = args.angle       # degrees
+    data['init_height'] = args.height   # y-axis
+    data['init_velocity'] = args.velocity  # m/s
+    data['theta'] = args.angle       # degrees
     # Constants
     data['rho'] = 1.225  # kg/m^3
     data['Cd'] = 0.5    # coefficient friction
