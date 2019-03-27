@@ -6,7 +6,7 @@ g = 9.8
 m = 1.0
 rho = 1.0
 Cd = 1.0
-A = math.pi * pow(0.01,2.0)
+A = math.pi * pow(0.01, 2.0)
 alpha = rho * Cd * A / 2.0
 beta = alpha / m
 
@@ -27,7 +27,7 @@ Y_ND = list()
 
 for i in arange(steps+1):
   X_ND.append(X0 + Vx0 * dt * i)
-  Y_ND.append(Y0 + Vy0 * dt * i - 0.5 * g * pow(dt * i,2.0))
+  Y_ND.append(Y0 + Vy0 * dt * i - 0.5 * g * pow(dt * i, 2.0))
 
 # With drag
 X_WD = list()
@@ -37,7 +37,7 @@ Vy_WD = list()
 
 for i in arange(steps+1):
   X_ND.append(X0 + Vx0 * dt * i)
-  Y_ND.append(Y0 + Vy0 * dt * i - 0.5 * g * pow(dt * i,2.0))
+  Y_ND.append(Y0 + Vy0 * dt * i - 0.5 * g * pow(dt * i, 2.0))
 
 # With drag
 X_WD = list()

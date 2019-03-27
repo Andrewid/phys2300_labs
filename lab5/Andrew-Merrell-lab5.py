@@ -61,32 +61,34 @@ def motion_drag(data):
     scene.camera.follow(ball_wd)
 
     data["x2"] = []
+    data['vx2'] = []
     data["y2"] = []
-    y0 = data["init_height"]
-    x0 = 0
-    x, y = x0, y0
-    ball_wd.pos.x = x
-    ball_wd.pos.y = y
+    data['vy2'] = []
+
+    x = ball_wd.pos.x
+    y = ball_wd.pos.y
+    beta = data['beta']
+    g = data['gravity']
     dt = data['deltat']
-    t = 0
-    vx0 = data['init_velocity'] * cos(radians(data['theta']))
-    vy0 = data['init_velocity'] * sin(radians(data['theta']))
+    data['vx2'].append(data['init_velocity'] * cos(radians(data['theta'])))
+    data['vy2'].append(data['init_velocity'] * sin(radians(data['theta'])))
+    rate(1000)
     while y >= 0:
+        speed = sqrt(x*x+y*y)
+        data['vx2'].append(data['vx2'][-1] * (1.0 - beta * speed * dt))
+        data['vy2'].append(data['vy2'][-1] + (g - beta * speed *
+                                              data['vy2'][-1]) * dt)
+        data["x2"].append(data['vx2'][-1] * dt + x)
+        data["y2"].append(data['vy2'][-1] * dt + y)
+
+        # ball_wd.pos = vector(data["x2"][-1], data["y2"][-1], 0)
+        x = data["x2"][-1]
+        y = data["y2"][-1]
+    for x, y in zip(data["x2"], data["y2"]):
         rate(1000)
-        data["x2"].append(x)
-        data["y2"].append(y)
-        ball_wd.pos = vector(x, y, 0)
-        t = t + dt
-        # TODO:
-        _Fd = (-.5 * data['rho'] *
-               data['init_velocity'] *
-               data['ball_area'])
+        ball_wd.pos.x = x
+        ball_wd.pos.y = y
 
-        x = (x0 + vx0 * t + _Fd)
-        y = (y0 + vy0 * t +
-             (data['gravity']/2) * (t**2) + _Fd)
-
-    pass
 
 def plot_data(data):
     """
@@ -96,10 +98,12 @@ def plot_data(data):
     """
 
     plt.figure()
-    plt.title('')  # TODO:
+    plt.title('Projectile motion')
     plt.plot(data['x1'], data['y1'], label="No air resistance")
     plt.plot(data['x2'], data['y2'], label="With air resistance")
+    plt.legend()
     plt.show()
+
     pass
 
 def main():
@@ -112,12 +116,14 @@ def main():
                         help="Position on the Y axis to start",
                         required=False)
     # TODO: make the following 2 required
-    parser.add_argument("--velocity", "-v", default='20', type=float,
+    parser.add_argument("--velocity", "-v",  # default='20',
+                        type=float,
                         help="Velocity in m/s",
-                        required=False)
-    parser.add_argument("--angle", "-a", default='45', type=float,
+                        required=True)
+    parser.add_argument("--angle", "-a",  # default='45',
+                        type=float,
                         help="Angle in degrees (will be converted)",
-                        required=False)
+                        required=True)
 
     args = parser.parse_args()
     # Set Variables
@@ -129,9 +135,9 @@ def main():
     data['rho'] = 1.225  # kg/m^3
     data['Cd'] = 0.5    # coefficient friction
     data['deltat'] = 0.005
-    data['gravity'] = -9.81  # m/s^2
+    data['gravity'] = -9.81  # m/s^2 [added .01]
 
-    data['ball_mass'] = 0.145  # kg
+    data['ball_mass'] = 1 # 0.145  # kg
     data['ball_radius'] = 0.075  # meters
     data['ball_area'] = pi * data['ball_radius']**2
     data['alpha'] = data['rho'] * data['Cd'] * data['ball_area'] / 2.0
