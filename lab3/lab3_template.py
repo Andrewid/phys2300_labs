@@ -43,8 +43,8 @@ def parse_data(infile):
                         One list with the information from the fourth column (temperature)
     """
     wdates = []             # list of dates data
-    wtemperatures = []      # list of temperarture data
-
+    wtemperatures = []      # list of temperature data
+    #
     return wdates, wtemperatures
 
 
@@ -68,6 +68,7 @@ def plot_data_task1(wyear, wtemp, month_mean, month_std):
     Create plot for Task 1.
     :param: wyear: list with year (in decimal)
     :param: wtemp: temperature per
+
     :param: month_mean: list with month's mean values
     :param: month_std: list with month's mean standard dev values
     """

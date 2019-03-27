@@ -2,12 +2,12 @@
 Assignment to learn how to interpolate data1
 '''
 import sys
-# import matplotlib.pyplot as plt
-# import numpy as np
-# import scipy
-# import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy
+import pandas as pd
 
-https://youtu.be/-zvHQXnBO6c
+# https://youtu.be/-zvHQXnBO6c
 def read_wx_data(wx_file, harbor_data):
     """
     Read temperature and time data from file.
