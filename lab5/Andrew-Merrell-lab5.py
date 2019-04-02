@@ -1,4 +1,4 @@
-from vpython import *
+from vpython import scene, vector, sphere, color
 from math import sin, cos
 import matplotlib.pyplot as plt
 import argparse
