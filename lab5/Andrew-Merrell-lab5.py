@@ -1,5 +1,5 @@
-from vpython import scene, vector, sphere, color
-from math import sin, cos
+from vpython import scene, vector, sphere, color, radians, rate
+from math import sin, cos, pi, sqrt
 import matplotlib.pyplot as plt
 import argparse
 

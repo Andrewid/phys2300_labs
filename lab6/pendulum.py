@@ -53,7 +53,7 @@ def main():
     tpoints = np.arange(0, 20, r)
 
     # Use the 4'th order Runga-Kutta approximation
-    for t in tpoints:
+    for _t in tpoints:
         theta.append(angles[0] * (180.0 / np.pi))
         k1 = r * f_theta_omega(angles)
         k2 = r * f_theta_omega(angles + 0.5 * k1)
@@ -85,14 +85,14 @@ def main():
         # Update positions
         x = length * np.sin(angle)
         y = -length * np.cos(angle)
-        
+
         bob.pos = vector(x, y, 0)
         rope.axis = bob.pos  # axis points towards the bob
 
     # Task 3
     theta_d = []  # New array of angles for the function with drag
     drag = .3
-    for t in tpoints:
+    for _t in tpoints:
         theta_d.append(angles[0] * (180.0 / np.pi))
         k1 = r * f_theta_omega(angles, drag)
         k2 = r * f_theta_omega(angles + 0.5 * k1, drag)
