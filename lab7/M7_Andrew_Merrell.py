@@ -1,10 +1,10 @@
+from vpython import *
 import numpy as np
 import pandas as pd  # read_csv()
-from vpython import *
 import argparse
 
 # globals
-Planets = []
+System = []
 G = 1.36*10**-34     # In (au^3/kg*s)
 day = 24*60*60.0     # seconds per day
 year = 365.25 * day  # seconds per year
@@ -34,16 +34,16 @@ def main():
     populate_system(file)
     # an animation loop calculating the planet's next position
     # animate(False)
-    animate(True)
+    animate(True)  # True if we do want the leap frog method
     # based on their gravitational interactions
 
 
 def populate_system(file):
     planet_color = 0
     # Add the Sun object
-    Planets.append(Planet(mass=1.9891e30, pos0=vector(0, 0, 0),
-                          vel=vector(0, 0, 0), name='Sun'))
-    Planets[planet_color].sphere.color = Colors[planet_color]
+    System.append(Planet(mass=1.9891e30, pos0=vector(0, 0, 0),
+                         vel=vector(0, 0, 0), name='Sun'))
+    System[planet_color].sphere.color = Colors[planet_color]
     # Parse the CSV, skip line one, make line 2 the header
     planet_data = pd.read_csv(file, skiprows=1)
     for i, row in planet_data.iterrows():
@@ -53,13 +53,13 @@ def populate_system(file):
         vx = float(row[' vx(au/day)'])
         vy = float(row[' vy(au/day)'])
         mass = float(row[' mass(kg)'])
-        Planets.append(Planet(mass=mass,
-                              pos0=vector(x0, y0, 0),
-                              vel=vector(vx, vy, 0),
-                              name=name))
+        System.append(Planet(mass=mass,
+                             pos0=vector(x0, y0, 0),
+                             vel=vector(vx, vy, 0),
+                             name=name))
         if planet_color < (len(Colors) - 1):  # do next, if there is a next
             planet_color += 1
-        # Planets[planet_color].sphere.color = Colors[planet_color]
+        System[planet_color].sphere.color = Colors[planet_color]
 
 
 def animate(leapfrog):
@@ -80,25 +80,24 @@ def animate(leapfrog):
     # a trigger that goes off once pluto
     # makes a full "year" loop
     while t < time_span:
-
         rate(500)
-        for planet1 in Planets:  # i
+        for body1 in System:  # i
             acc = vector(0, 0, 0)
-            for planet2 in Planets:  # j
-                if planet1 != planet2:
+            for body2 in System:  # j
+                if body1 != body2:
                     # Distance Vector
-                    distance = planet2.sphere.pos - planet1.sphere.pos
+                    distance = body2.sphere.pos - body1.sphere.pos
                     # Magnitude scalar
                     magnitude = distance.mag
                     # magnitude = ((planet2.sphere.pos.x-planet1.sphere.pos.x)**2 +
                     #              (planet2.sphere.pos.y-planet1.sphere.pos.y)**2) ** .5
-                    acc += G * planet2.mass * distance / (magnitude**3)
+                    acc += G * body2.mass * distance / (magnitude**3)
 
             delta = acc * (dt / leap)
             # only leap once
 
-            planet1.velocity += delta
-            planet1.sphere.pos += planet1.velocity * dt
+            body1.velocity += delta
+            body1.sphere.pos += body1.velocity * dt
         if leap == 2:  # Change leap only after each planet has been calculated
             leap = 1
         t += dt
