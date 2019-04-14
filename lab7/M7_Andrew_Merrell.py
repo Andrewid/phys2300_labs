@@ -41,7 +41,7 @@ def main():
 def populate_system(file):
     planet_color = 0
     # Add the Sun object
-    Planets.append(Planet(mass=1.9891e30, pos=vector(0, 0, 0),
+    Planets.append(Planet(mass=1.9891e30, pos0=vector(0, 0, 0),
                           vel=vector(0, 0, 0), name='Sun'))
     Planets[planet_color].sphere.color = Colors[planet_color]
     # Parse the CSV, skip line one, make line 2 the header
@@ -54,7 +54,7 @@ def populate_system(file):
         vy = float(row[' vy(au/day)'])
         mass = float(row[' mass(kg)'])
         Planets.append(Planet(mass=mass,
-                              pos=vector(x0, y0, 0),
+                              pos0=vector(x0, y0, 0),
                               vel=vector(vx, vy, 0),
                               name=name))
         if planet_color < (len(Colors) - 1):  # do next, if there is a next
@@ -90,8 +90,8 @@ def animate(leapfrog):
                     distance = planet2.sphere.pos - planet1.sphere.pos
                     # Magnitude scalar
                     magnitude = distance.mag
-                    # magnitude = sqrt((planet2.sphere.pos.x-planet1.sphere.pos.x)**2 +
-                    #                  (planet2.sphere.pos.y-planet1.sphere.pos.y)**2)
+                    # magnitude = ((planet2.sphere.pos.x-planet1.sphere.pos.x)**2 +
+                    #              (planet2.sphere.pos.y-planet1.sphere.pos.y)**2) ** .5
                     acc += G * planet2.mass * distance / (magnitude**3)
 
             delta = acc * (dt / leap)
@@ -106,10 +106,13 @@ def animate(leapfrog):
 
 
 class Planet(object):
+    # Why not just a sphere object that gains
+    # a Velocity vector a
+    # Mass and a Name?
     def __init__(self, **kwargs):
 
         self.mass = kwargs.get('mass')  # in kg
-        self.pos0 = kwargs.get('pos')   # initial position as a vector
+        self.pos0 = kwargs.get('pos0')   # initial position as a vector
         self.velocity = kwargs.get('vel')    # Also a vector
         self.name = kwargs.get('name')  # Planet name
         self.sphere = sphere(pos=self.pos0, radius=radius)  # radius=self.mass*scale?
