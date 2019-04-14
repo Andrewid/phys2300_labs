@@ -89,17 +89,18 @@ def animate(leapfrog):
                     # Distance Vector
                     distance = planet2.sphere.pos - planet1.sphere.pos
                     # Magnitude scalar
-                    magnitude = sqrt(distance.dot(distance))
+                    magnitude = distance.mag
                     # magnitude = sqrt((planet2.sphere.pos.x-planet1.sphere.pos.x)**2 +
                     #                  (planet2.sphere.pos.y-planet1.sphere.pos.y)**2)
                     acc += G * planet2.mass * distance / (magnitude**3)
 
             delta = acc * (dt / leap)
             # only leap once
-            if leap == 2:
-                leap = 1
+
             planet1.velocity += delta
             planet1.sphere.pos += planet1.velocity * dt
+        if leap == 2:  # Change leap only after each planet has been calculated
+            leap = 1
         t += dt
     return 1
 
