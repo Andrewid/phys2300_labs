@@ -1,3 +1,14 @@
+"""
+This program attempts  to model the
+solar system and animate the bodies based on
+their initial positions, velocity vectors and masses
+and calculates their positions based on the gravitational
+forces each body has on every other body. (including the Sun)
+
+-Andrew Merrell
+for Physics 2300
+Dr. Hugo Valle
+"""
 from vpython import *
 import numpy as np
 import pandas as pd  # read_csv()
@@ -61,6 +72,8 @@ def populate_system(file):
             planet_color += 1
         System[planet_color].sphere.color = Colors[planet_color]
 
+    # Asteroid loop here
+
 
 def animate(leapfrog):
     """
@@ -80,10 +93,12 @@ def animate(leapfrog):
     # a trigger that goes off once pluto
     # makes a full "year" loop
     while t < time_span:
-        rate(500)
+        rate(60)
         for body1 in System:  # i
             acc = vector(0, 0, 0)
             for body2 in System:  # j
+                # We can have a bunch of "asteroid" objects
+                # and they won't interact with each other
                 if body1.name == body2.name:
                     continue
                 # Distance Vector
@@ -118,6 +133,8 @@ class Planet(object):
         self.name = kwargs.get('name')  # Planet name
         self.sphere = sphere()
         self.sphere.pos = self.pos0  # move it before making trail
+        if "Earth" in self.name:
+            self.sphere.material = materials.earth
         self.sphere.make_trail = True
 
 
