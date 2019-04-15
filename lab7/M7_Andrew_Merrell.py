@@ -71,6 +71,7 @@ def populate_system(file):
         if planet_color < (len(Colors) - 1):  # do next, if there is a next
             planet_color += 1
         System[planet_color].sphere.color = Colors[planet_color]
+        # System[planet_color].sphere.trail_object.color = Colors[planet_color]
 
     # Asteroid loop here
 
@@ -131,11 +132,13 @@ class Planet(object):
         self.pos0 = kwargs.get('pos0')   # initial position as a vector
         self.velocity = kwargs.get('vel')    # Also a vector
         self.name = kwargs.get('name')  # Planet name
-        self.sphere = sphere()
-        self.sphere.pos = self.pos0  # move it before making trail
-        if "Earth" in self.name:
-            self.sphere.material = materials.earth
-        self.sphere.make_trail = True
+        self.sphere = sphere(pos=self.pos0,
+                             radius=radius,  # constant of .0125
+                             make_trail=True
+                             )  # move it before making trail
+        # if "Earth" in self.name:
+        #     self.sphere.material = materials.earth
+
 
 
 if __name__ == '__main__':
