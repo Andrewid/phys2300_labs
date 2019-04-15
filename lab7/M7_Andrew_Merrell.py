@@ -44,7 +44,7 @@ def main():
     # call function to populate a list of planet objects extracted from the csv file
     populate_system(file)
     # an animation loop calculating the planet's next position
-    # animate(False)
+    # animate(False)  # Uncomment for task 1
     animate(True)  # True if we do want the leap frog method
     # based on their gravitational interactions
 
@@ -53,8 +53,10 @@ def populate_system(file):
     planet_color = 0
     # Add the Sun object
     System.append(Planet(mass=1.9891e30, pos0=vector(0, 0, 0),
-                         vel=vector(0, 0, 0), name='Sun'))
+                         vel=vector(0, 0, 0), name='Sun'
+                         ))
     System[planet_color].sphere.color = Colors[planet_color]
+    System[planet_color].sphere.trail_color = color.yellow
     # Parse the CSV, skip line one, make line 2 the header
     planet_data = pd.read_csv(file, skiprows=1)
     for i, row in planet_data.iterrows():
@@ -71,7 +73,7 @@ def populate_system(file):
         if planet_color < (len(Colors) - 1):  # do next, if there is a next
             planet_color += 1
         System[planet_color].sphere.color = Colors[planet_color]
-        # System[planet_color].sphere.trail_object.color = Colors[planet_color]
+        System[planet_color].sphere.trail_color = Colors[planet_color]
 
     # Asteroid loop here
 
@@ -88,13 +90,13 @@ def animate(leapfrog):
         leap = 2
     # acc = vector(0, 0, 0)
     t = 0
-    dt = day
+    dt = .5  # day
     time_span = year * 5
     # maybe modify this loop to catch
     # a trigger that goes off once pluto
     # makes a full "year" loop
     while t < time_span:
-        rate(60)
+        rate(year/2.0)
         for body1 in System:  # i
             acc = vector(0, 0, 0)
             for body2 in System:  # j
@@ -106,7 +108,7 @@ def animate(leapfrog):
                 distance = body2.sphere.pos - body1.sphere.pos
                 # Magnitude scalar
                 magnitude = distance.mag
-                print(f'{body1.name} is {magnitude} au. from {body2.name}')
+                # print(f'{body1.name} is {magnitude} au. from {body2.name}')
                 # magnitude = ((planet2.sphere.pos.x-planet1.sphere.pos.x)**2 +
                 #              (planet2.sphere.pos.y-planet1.sphere.pos.y)**2) ** .5
                 acc += G * body2.mass * distance / (magnitude**3)
