@@ -84,14 +84,16 @@ def animate(leapfrog):
         for body1 in System:  # i
             acc = vector(0, 0, 0)
             for body2 in System:  # j
-                if body1 != body2:
-                    # Distance Vector
-                    distance = body2.sphere.pos - body1.sphere.pos
-                    # Magnitude scalar
-                    magnitude = distance.mag
-                    # magnitude = ((planet2.sphere.pos.x-planet1.sphere.pos.x)**2 +
-                    #              (planet2.sphere.pos.y-planet1.sphere.pos.y)**2) ** .5
-                    acc += G * body2.mass * distance / (magnitude**3)
+                if body1.name == body2.name:
+                    continue
+                # Distance Vector
+                distance = body2.sphere.pos - body1.sphere.pos
+                # Magnitude scalar
+                magnitude = distance.mag
+                print(f'{body1.name} is {magnitude} au. from {body2.name}')
+                # magnitude = ((planet2.sphere.pos.x-planet1.sphere.pos.x)**2 +
+                #              (planet2.sphere.pos.y-planet1.sphere.pos.y)**2) ** .5
+                acc += G * body2.mass * distance / (magnitude**3)
 
             delta = acc * (dt / leap)
             # only leap once
@@ -114,7 +116,8 @@ class Planet(object):
         self.pos0 = kwargs.get('pos0')   # initial position as a vector
         self.velocity = kwargs.get('vel')    # Also a vector
         self.name = kwargs.get('name')  # Planet name
-        self.sphere = sphere(pos=self.pos0, radius=radius)  # radius=self.mass*scale?
+        self.sphere = sphere()
+        self.sphere.pos = self.pos0  # move it before making trail
         self.sphere.make_trail = True
 
 
