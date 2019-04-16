@@ -17,8 +17,6 @@ import argparse
 # globals
 System = []
 G = 1.36*10**-34     # In (au^3/kg*s)
-day = 24*60*60.0     # seconds per day
-year = 365.25 * day  # seconds per year
 radius = .0125
 
 light_blue = color.blue + color.white
@@ -88,15 +86,11 @@ def animate(leapfrog):
     leap = 1
     if leapfrog:
         leap = 2
-    # acc = vector(0, 0, 0)
     t = 0
-    dt = .5  # day
-    time_span = year * 5
-    # maybe modify this loop to catch
-    # a trigger that goes off once pluto
-    # makes a full "year" loop
-    while t < time_span:
-        rate(year/2.0)
+    dt = .5  # not day
+
+    while True:
+        rate(2400)  #
         for body1 in System:  # i
             acc = vector(0, 0, 0)
             for body2 in System:  # j
@@ -104,23 +98,18 @@ def animate(leapfrog):
                 # and they won't interact with each other
                 if body1.name == body2.name:
                     continue
-                # Distance Vector
-                distance = body2.sphere.pos - body1.sphere.pos
-                # Magnitude scalar
-                magnitude = distance.mag
-                # print(f'{body1.name} is {magnitude} au. from {body2.name}')
-                # magnitude = ((planet2.sphere.pos.x-planet1.sphere.pos.x)**2 +
-                #              (planet2.sphere.pos.y-planet1.sphere.pos.y)**2) ** .5
+                distance = body2.sphere.pos - body1.sphere.pos  # Distance Vector
+                magnitude = distance.mag  # Magnitude scalar
                 acc += G * body2.mass * distance / (magnitude**3)
 
             delta = acc * (dt / leap)
-            # only leap once
-
             body1.velocity += delta
             body1.sphere.pos += body1.velocity * dt
         if leap == 2:  # Change leap only after each planet has been calculated
             leap = 1
         t += dt
+        # if t % (248*365) == 0:  # pluto takes about 248 earth years to orbit
+        #     print(t)
     return 1
 
 
@@ -135,9 +124,9 @@ class Planet(object):
         self.velocity = kwargs.get('vel')    # Also a vector
         self.name = kwargs.get('name')  # Planet name
         self.sphere = sphere(pos=self.pos0,
-                             radius=radius,  # constant of .0125
-                             make_trail=True
-                             )  # move it before making trail
+                             make_trail=True,
+                             radius=radius  # constant of .0125
+                             )  # move it before making trail?
         # if "Earth" in self.name:
         #     self.sphere.material = materials.earth
 
