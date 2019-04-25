@@ -81,20 +81,23 @@ def animate():
     global Water_level, spigot_height, spigot_radius, _water
     # do while water_level > 0
     t = 0
-    while Water_level > 0:
+    while True:
         rate(fps)
         t = t + dt
         # create drop
-        drop = sphere(pos=vector(0, spigot_radius/2.0, 0),
-                      color=color.blue,
-                      opacity=.75)
-        drop.v = get_initial_velocity()
-        # add drop to list
-        droplets.append(drop)
-        # update water level
-        Water_level = update_water_level()
-        _water.length = Water_level
-        # for drop in list animate
+        if Water_level > 0:
+            drop = sphere(pos=vector(0, spigot_radius/2.0, 0),
+                          color=color.blue,
+                          opacity=.75)
+            drop.v = get_initial_velocity()
+            # add drop to list
+            droplets.append(drop)
+            # update water level
+            Water_level = update_water_level()
+            _water.length = Water_level
+            # for drop in list animate
+        else:
+            _water.visible = 0
         for droplet in droplets:
             # Calculate new velocity adding gravity
             droplet.v = droplet.v + gVector * dt
