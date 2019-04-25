@@ -11,14 +11,16 @@ def set_scene(data):
     scene.title = "Assignment 5: Projectile motion"
     scene.width = 800
     scene.height = 600
-    scene.caption = """Right button drag or Ctrl-drag to rotate "camera" to view scene.
-    To zoom, drag with middle button or Alt/Option depressed, or use scroll wheel.
+    scene.caption = """Right button drag or Ctrl-drag to rotate 
+    "camera" to view scene.    To zoom, drag with middle button 
+    or Alt/Option depressed, or use scroll wheel.
     On a two-button mouse, middle is left + right.
     Touch screen: pinch/extend to zoom, swipe or two-finger rotate."""
     scene.forward = vector(0, -.3, -1)
     scene.x = -1
     # Set background: floor, table, etc
-    #ground = box(pos=(100, 0, 0), size=(200, 0, 0))
+    # ground = box(pos=(100, 0, 0), size=(200, 0, 0))
+
 
 def motion_no_drag(data):
     """
@@ -106,6 +108,7 @@ def plot_data(data):
 
     pass
 
+
 def main():
     """
     """
@@ -116,29 +119,28 @@ def main():
                         help="Position on the Y axis to start",
                         required=False)
     # TODO: make the following 2 required
-    parser.add_argument("--velocity", "-v",  # default='20',
+    parser.add_argument("--velocity", "-v",   default='20',
                         type=float,
                         help="Velocity in m/s",
-                        required=True)
-    parser.add_argument("--angle", "-a",  # default='45',
+                        )  # required=True)
+    parser.add_argument("--angle", "-a",   default='45',
                         type=float,
                         help="Angle in degrees (will be converted)",
-                        required=True)
+                        )  # required=True)
 
     args = parser.parse_args()
     # Set Variables
-    data = {}       # empty dictionary for all data and variables
-    data['init_height'] = args.height       # y-axis
-    data['init_velocity'] = args.velocity   # m/s
-    data['theta'] = args.angle              # degrees
+    data = {'init_height': args.height,
+            'init_velocity': args.velocity,
+            'theta': args.angle,
+            'rho': 1.225,
+            'Cd': 0.5,
+            'deltat': 0.005,
+            'gravity': -9.81,
+            'ball_mass': 1,
+            'ball_radius': 0.075}  # dictionary for all data and variables
     # Constants
-    data['rho'] = 1.225  # kg/m^3
-    data['Cd'] = 0.5    # coefficient friction
-    data['deltat'] = 0.005
-    data['gravity'] = -9.81  # m/s^2 [added .01]
 
-    data['ball_mass'] = 1 # 0.145  # kg
-    data['ball_radius'] = 0.075  # meters
     data['ball_area'] = pi * data['ball_radius']**2
     data['alpha'] = data['rho'] * data['Cd'] * data['ball_area'] / 2.0
     data['beta'] = data['alpha'] / data['ball_mass']
