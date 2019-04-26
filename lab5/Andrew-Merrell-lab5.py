@@ -76,7 +76,8 @@ def motion_drag(data):
     data['vy2'].append(data['init_velocity'] * sin(radians(data['theta'])))
     rate(1000)
     while y >= 0:
-        speed = sqrt(x*x+y*y)
+        speed = vector(x, y, 0).mag
+
         data['vx2'].append(data['vx2'][-1] * (1.0 - beta * speed * dt))
         data['vy2'].append(data['vy2'][-1] + (g - beta * speed *
                                               data['vy2'][-1]) * dt)

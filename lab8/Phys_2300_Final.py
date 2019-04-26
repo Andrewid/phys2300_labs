@@ -18,8 +18,6 @@ based on the distance below the surface at which the jet starts,
 assuming no air resistance, viscosity, or other hindrance to the fluid flow. "
 
 I will attempt to reproduce an animated version of this.
-I will take into account air resistance once the
-"droplet" (a sphere) exits the "bucket" (a cylinder)
 
 Sources:
 https://en.wikipedia.org/wiki/Drag_coefficient
@@ -27,9 +25,10 @@ https://en.wikipedia.org/wiki/Torricelli's_law
 https://en.wikipedia.org/wiki/Projectile_motion
 https://www.desmos.com/calculator/on4xzwtdwz
 """
+import argparse
+
 # import math?
 from vpython import *
-import argparse
 
 fps = 64
 dt = 1/fps
@@ -55,10 +54,17 @@ droplets = []
 
 
 def set_scene():
-    global _water
+    global _water, spigot_height
     scene.title = "Final Project, Torricelli's Law"
     # floor
+    _floor = box(pos=vector(bucket_radius, -table_height, 0),
+                 length=bucket_radius*6, width=bucket_radius*3)
     # table
+    _table = box(pos=vector(-bucket_radius, -spigot_radius, 0),
+                 height=spigot_radius*2,
+                 width=bucket_radius*2,
+                 length=bucket_radius*2)
+    # legs?
     # bucket [opacity .25?]
     _bucket = cylinder(radius=bucket_radius, axis=vector(0, 1, 0),
                        length=bucket_height,
@@ -70,6 +76,7 @@ def set_scene():
                       pos=vector(-bucket_radius, 0, 0),
                       color=color.blue, visible=1)
     # spigot hole?
+    spigot_height = spigot_height + spigot_radius
     # initialize water volume?
 
 
@@ -81,14 +88,21 @@ def animate():
     global Water_level, spigot_height, spigot_radius, _water
     # do while water_level > 0
     t = 0
-    while True:
+    # Before getting into this loop let's
+    # calculate the air resistance
+    # variables since all "drops" are the same
+    _drop_area = pi * spigot_radius**2  # cross sectional area of the droplet
+    _alpha = rho * Cd * _drop_area / 2.0
+    # _beta = _alpha / _drop_mass  # if mass = 1 then _alpha == _beta
+    while Water_level > 0 or len(droplets) > 0:
         rate(fps)
         t = t + dt
         # create drop
         if Water_level > 0:
-            drop = sphere(pos=vector(0, spigot_radius/2.0, 0),
+            drop = sphere(pos=vector(0, spigot_height, 0),
                           color=color.blue,
-                          opacity=.75)
+                          opacity=.25,
+                          shininess=.7)
             drop.v = get_initial_velocity()
             # add drop to list
             droplets.append(drop)
@@ -101,12 +115,16 @@ def animate():
         for droplet in droplets:
             # Calculate new velocity adding gravity
             droplet.v = droplet.v + gVector * dt
+            _speed = droplet.v.mag
+
             # And air resistance?
             # calculate new position & move to it
             droplet.pos = droplet.pos + droplet.v * dt
             if droplet.pos.y < - table_height:
                 droplet.visible = 0
                 droplets.remove(droplet)  # not sure that will work
+        print(Water_level, len(droplets))
+    print("All done!")
 
 
 def update_water_level():
@@ -133,7 +151,7 @@ def get_initial_velocity():
     :return: a velocity vector
     """
     global Water_level, spigot_height
-    vx = (float(2.0*-g*(Water_level - spigot_height)))**.5
+    vx = (float(2.0*-g*(Water_level - spigot_height + spigot_radius)))**.5
     return vector(vx, 0, 0)
 
 
@@ -144,25 +162,37 @@ def main():
     call animate
     """
     # 1) Parse the arguments
-
+    """ parser.add_argument("--spigot_height", "-s", default=0.0, type=float,
+                         help="Spigot height",
+                         required=False)
+     Changing spigot height from 0 will require moving the _water
+     up to the spigot height and adding another "useless"
+     cylinder of water, that never empties.
+                         """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--spigot_height", "-s", default=0.0, type=float,
-                        help="Spigot height",
+    global bucket_radius, bucket_height, table_height, spigot_radius
+    parser.add_argument("--bucket_height", "-b", default=20.0, type=float,
+                        choices=arange(10, 40, 5),
+                        help="Bucket height",
                         required=False)
-    parser.add_argument("--spigot_radius", "-r", default=1.25, type=float,
+
+    parser.add_argument("--bucket_radius", "-br", default=10.0, type=float,
+                        choices=arange(5, 20, 5),
+                        help="Bucket_radius",
+                        required=False)
+
+    parser.add_argument("--spigot_radius", "-r", default=1, type=float,
                         help="Spigot radius, 1/8th meter to 3/2",
-                        choices=arange(.125, 1.5, .125),
+                        choices=arange(.25, 2, .125),
                         required=False)
     parser.add_argument("--table_height", "-t", default=20.0, type=float,
                         help="Table height",
                         required=False)
 
     args = parser.parse_args()
-    global spigot_height
-    spigot_height = args.spigot_height
-    global table_height
+    bucket_radius = args.bucket_radius
+    bucket_height = args.bucket_height
     table_height = args.table_height
-    global spigot_radius
     spigot_radius = args.spigot_radius
     set_scene()
     animate()
