@@ -43,9 +43,10 @@ Water_level = bucket_height
 spigot_height = 0.0
 spigot_radius = 1.0
 
-g = -20091.0/2048.0  # Gravity, locally = 9.81005859375
+g = -5021.0/512.0  # Gravity "locally" about 9.80665
 gVector = vector(0, g, 0)
 rho = 1.225  # air resistance
+rho_water = 1000  # density of water in kg per meter cubed
 Cd = 481.0/1024.0  # pretty close to the drag coefficient of a sphere
 four_thirds = 21845.0/16384.0  # accurate to 4 decimal places w/o binary loss
 _water = cylinder(visible=0)
@@ -66,14 +67,15 @@ def set_scene():
                  length=bucket_radius*2)
     # legs?
     # bucket [opacity .25?]
-    _bucket = cylinder(radius=bucket_radius, axis=vector(0, 1, 0),
+    _bucket = cylinder(radius=bucket_radius+.125, axis=vector(0, 1, 0),
                        length=bucket_height,
                        pos=vector(-bucket_radius, 0, 0),
-                       color=color.white, opacity=.5)
+                       color=color.white, opacity=.25)
     # water [in bucket]
     _water = cylinder(radius=bucket_radius, axis=vector(0, 1, 0),
                       length=Water_level,
                       pos=vector(-bucket_radius, 0, 0),
+                      opacity=.25,
                       color=color.blue, visible=1)
     # spigot hole?
     spigot_height = spigot_height + spigot_radius
@@ -92,8 +94,9 @@ def animate():
     # calculate the air resistance
     # variables since all "drops" are the same
     _drop_area = pi * spigot_radius**2  # cross sectional area of the droplet
+    _drop_mass = four_thirds * pi * spigot_radius ** 3 * rho_water
     _alpha = rho * Cd * _drop_area / 2.0
-    # _beta = _alpha / _drop_mass  # if mass = 1 then _alpha == _beta
+    _beta = _alpha / _drop_mass  # if mass = 1 then _alpha == _beta
     while Water_level > 0 or len(droplets) > 0:
         rate(fps)
         t = t + dt
@@ -116,8 +119,8 @@ def animate():
             # Calculate new velocity adding gravity
             droplet.v = droplet.v + gVector * dt
             _speed = droplet.v.mag
-
             # And air resistance?
+            droplet.v -= droplet.v * _speed * _beta * dt
             # calculate new position & move to it
             droplet.pos = droplet.pos + droplet.v * dt
             if droplet.pos.y < - table_height:
